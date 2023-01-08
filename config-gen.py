@@ -196,7 +196,7 @@ def process_sections(ps):
                 print(f"PMM can perform a lot of different operations on a library.")
                 print(f"Most of these operations require some configuration.")
                 print(f"Going through them with a tool like this will ask a LOT of questions.")
-                print(f"For that reason this wil not be a comprehensive list of possibilities.")
+                print(f"For that reason this will not be a comprehensive list of possibilities.")
                 operations = []
                 if yes_or_no(f"Do you want to enable any operations on this library?"):
                     print(f"First, yes/no operations.")
@@ -235,11 +235,11 @@ def process_sections(ps):
                 print(f"Finally, overlays.")
                 print(f"Many of these overlays allow customization.")
                 print(f"Going through them with a tool like this will ask a LOT of questions.")
-                print(f"For that reason this wil not be a comprehensive list of possibilities.")
+                print(f"For that reason this will not be a comprehensive list of possibilities.")
                 print(f"The tool will just enable the base overlay.")
                 overlays = []
                 if yes_or_no(f"Do you want to enable any operations on this library?"):
-                    if yes_or_no(f"Add a small standard set of overlays to get started?"):
+                    if yes_or_no(f"Add a small standard set of overlays to get started?  If you answer 'no' I will ask about all possible overlays."):
                         section_yaml['overlay_path'] = get_std_overlays(plex_section.type)
                     else:
                         options = get_options("overlays", plex_section.type, mal=myanimelist, trakt=trakt, tautulli=tautulli)
@@ -355,7 +355,9 @@ while True:
         if plex is not None:
             print("Success.\n==============================\n")
             yaml_obj['plex']['url'] = PLEX_URL
+            config_data['PLEX_URL'] = PLEX_URL
             yaml_obj['plex']['token'] = PLEX_TOKEN
+            config_data['PLEX_TOKEN'] = PLEX_TOKEN
             break
         else:
             raise Exception
@@ -379,6 +381,7 @@ while True:
         tmdb = TMDbAPIs(TMDB_KEY, language="en")
         print("Success.\n==============================\n")
         yaml_obj['tmdb']['apikey'] = TMDB_KEY
+        config_data['TMDB_KEY'] = TMDB_KEY
         break
     except:
         print(f"That does not appear to be a valid TMDB key.")
@@ -408,7 +411,9 @@ while True:
                 print("Success.\n==============================\n")
                 tautulli = True
                 yaml_obj['tautulli']['url'] = TAUTULLI_URL
+                config_data['TAUTULLI_URL'] = TAUTULLI_URL
                 yaml_obj['tautulli']['apikey'] = TAUTULLI_KEY
+                config_data['TAUTULLI_KEY'] = TAUTULLI_KEY
                 break
         except Exception as ex:
             print(f"I was unable to connect to {TAUTULLI_URL}")
@@ -435,6 +440,7 @@ while True:
             if response.status_code < 400:
                 print("Success.\n==============================\n")
                 yaml_obj['omdb']['apikey'] = OMDB_KEY
+                config_data['OMDB_KEY'] = OMDB_KEY
                 break
             else:
                 raise Failed(f"OMDb Error")
@@ -467,7 +473,8 @@ while True:
                     response_json = response.json()
                     print("Success.\n==============================\n")
                     yaml_obj['notifiarr']['apikey'] = NOTIFIARR_KEY
-                    if yes_or_no("WOuld you like to configure notifications to go through Notifarr?"):
+                    config_data['NOTIFIARR_KEY'] = NOTIFIARR_KEY
+                    if yes_or_no("Would you like to configure notifications to go through Notifarr?"):
                         yaml_obj['webhooks']['error'] = 'notifiarr'
                         yaml_obj['webhooks']['version'] = 'notifiarr'
                         yaml_obj['webhooks']['run_start'] = 'notifiarr'
@@ -514,7 +521,9 @@ while True:
                     if response_html.xpath("//li[@class='sub-menu my']/@title"):
                         print("Success.\n==============================\n")
                         yaml_obj['anidb']['username'] = ANIDB_USER
+                        config_data['ANIDB_USER'] = ANIDB_USER
                         yaml_obj['anidb']['password'] = ANIDB_PASS
+                        config_data['ANIDB_PASS'] = ANIDB_PASS
                         break
                 except Exception as e:
                     raise Failed("AniDB Error")
@@ -543,7 +552,9 @@ while True:
             radarr = RadarrAPI(RADARR_URL, RADARR_TOKEN, session=session)
             print("Success.\n==============================\n")
             yaml_obj['radarr']['url'] = RADARR_URL
+            config_data['RADARR_URL'] = RADARR_URL
             yaml_obj['radarr']['token'] = RADARR_TOKEN
+            config_data['RADARR_TOKEN'] = RADARR_TOKEN
 
             RADARR_PROFILES = radarr.quality_profile()
             if len(RADARR_PROFILES) > 1:
@@ -618,7 +629,9 @@ while True:
 
             print("Success.\n==============================\n")
             yaml_obj['sonarr']['url'] = SONARR_URL
+            config_data['SONARR_URL'] = SONARR_URL
             yaml_obj['sonarr']['token'] = SONARR_TOKEN
+            config_data['SONARR_TOKEN'] = SONARR_TOKEN
 
             SONARR_PROFILES = sonarr.quality_profile()
             if len(SONARR_PROFILES) > 1:
@@ -782,7 +795,9 @@ while True:
 
                         trakt = True
                         yaml_obj['trakt']["client_id"] = TRAKT_CLIENT_ID
+                        config_data['TRAKT_CLIENT_ID'] = TRAKT_CLIENT_ID
                         yaml_obj['trakt']["client_secret"] = TRAKT_CLIENT_SECRET
+                        config_data['TRAKT_CLIENT_SECRET'] = TRAKT_CLIENT_SECRET
                         yaml_obj['trakt']["authorization"]["access_token"] = response.json()['access_token']
                         yaml_obj['trakt']["authorization"]["token_type"] = response.json()['token_type']
                         yaml_obj['trakt']["authorization"]["expires_in"] = response.json()['expires_in']
@@ -857,7 +872,9 @@ while True:
 
             myanimelist = True
             yaml_obj['mal']["client_id"] = MAL_CLIENT_ID
+            config_data['MAL_CLIENT_ID'] = MAL_CLIENT_ID
             yaml_obj['mal']["client_secret"] = MAL_CLIENT_SECRET
+            config_data['MAL_CLIENT_SECRET'] = MAL_CLIENT_SECRET
             yaml_obj['mal']["authorization"]["access_token"] = new_authorization["access_token"]
             yaml_obj['mal']["authorization"]["token_type"] = new_authorization["token_type"]
             yaml_obj['mal']["authorization"]["expires_in"] = new_authorization["expires_in"]
@@ -876,6 +893,10 @@ while True:
             print("Proceeding without MyAnimeList.\n")
             break
 print("Service connections complete.\n==============================\n")
+
+print("Writing config.json.\n==============================\n")
+with open("config.json", "w") as outfile:
+    json.dump(config_data, outfile, indent=4)
 
 print("Gathering Library details.\n==============================\n")
 

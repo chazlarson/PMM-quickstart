@@ -8,6 +8,8 @@ import urllib.parse as p
 import re
 import requests
 from plexapi.server import PlexServer
+from plexapi.exceptions import BadRequest, NotFound, Unauthorized
+from xml.etree.ElementTree import ParseError
 from tmdbapis import TMDbAPIs
 import click
 from lxml import html
@@ -334,7 +336,10 @@ print("You MAY need these bits of information, depending on which other services
     6. Your Sonarr URL and API Key\r\n\
     7. Your Trakt Client ID and Client Secret\r\n\
     8. Your MyAnimeList Client ID and Client Secret\r\n\
-     \r\n")
+     \r\n\
+    Every URL referenced above must be a fully-qualified URL:\r\n\
+    [https://plex.YOURDOMAIN.COM, http://radarr:8787, http://192.168.1.11:32400, etc.]\r\n\
+    This script assumes it is going to be able to connect to those URLs.\r\n")
 
 if yes_or_no("Are you prepared to continue?"):
     print("Cool.\n")
@@ -352,6 +357,7 @@ plex = None
 while True:
     PLEX_URL = click.prompt(f"Plex URL", type=str, default=config_data['PLEX_URL'])
     PLEX_TOKEN = click.prompt(f"Plex Token", type=str, default=config_data['PLEX_TOKEN'])
+    failed = False
 
     print(f"Attempting to connect to {PLEX_URL}...")
     try:
@@ -365,8 +371,21 @@ while True:
             break
         else:
             raise Exception
+    except Unauthorized:
+        print("Plex Error: Plex token is invalid")
+        failed = True
+    except ValueError as e:
+        print(f"Plex Error: {e}")
+        failed = True
+    except (requests.exceptions.ConnectionError, ParseError):
+        print("Plex Error: Plex url is invalid")
+        failed = True
     except Exception as ex:
         print(f"I was unable to connect to {PLEX_URL}")
+        failed = True
+
+    if failed:
+        print(f"I was unable to authenticate against {PLEX_URL}")
         print("This may not be a problem, but it will prevent this script")
         print("from automatically configuring libraries.")
         if yes_or_no("Would you like to enter a different URL or token?"):
@@ -374,9 +393,8 @@ while True:
         else:
             print("I will continue with that URL and token.")
 #             print("I will ask for library names later.\n")
-            print("You will need to configure the rest of this section manually.\n")
+            print("You will need to configure your libraries manually.\n")
             break
-
 
 while True:
     TMDB_KEY = click.prompt(f"TMDB API Key", type=str, default=config_data['TMDB_KEY'])

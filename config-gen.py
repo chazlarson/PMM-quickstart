@@ -233,16 +233,26 @@ def process_sections(ps):
 
                 # Something about overlays
                 print(f"Finally, overlays.")
-                if yes_or_no(f"Add a small standard set of overlays to get started?"):
-                    section_yaml['overlay_path'] = get_std_overlays(plex_section.type)
-                else:
-                    overlays = []
-                    options = get_options("overlays", plex_section.type, mal=myanimelist, trakt=trakt, tautulli=tautulli)
-                    for o in options:
-                        print(f"Add the {o.name} overlays?")
-                        if yes_or_no(f"{o.notes}"):
-                            overlays.append(o)
+                print(f"Many of these overlays allow customization.")
+                print(f"Going through them with a tool like this will ask a LOT of questions.")
+                print(f"For that reason this wil not be a comprehensive list of possibilities.")
+                print(f"The tool will just enable the base overlay.")
+                overlays = []
+                if yes_or_no(f"Do you want to enable any operations on this library?"):
+                    if yes_or_no(f"Add a small standard set of overlays to get started?"):
+                        section_yaml['overlay_path'] = get_std_overlays(plex_section.type)
+                    else:
+                        options = get_options("overlays", plex_section.type, mal=myanimelist, trakt=trakt, tautulli=tautulli)
+                        for o in options:
+                            print(f"Add the {o.name} overlays?")
+                            if yes_or_no(f"{o.notes}"):
+                                overlays.append(o)
+
+                        
+                if len(overlays) > 0:
                     section_yaml['overlay_path'] = get_overlays_ops() + convert_to_default_path(overlays)
+                else:
+                    section_yaml.pop('overlay_path')
 
                 library_yaml[plex_section.title] = section_yaml
         else:
@@ -302,7 +312,7 @@ print("We're going to generate a Plex-Meta-Manager config file. \r\n\r\n\
 You WILL need these three bits of information: \r\n\
     1. Your Plex URL \r\n\
     2. Your Plex Token \r\n\
-    3. A TMDB API token \r\n\
+    3. Your TMDB API Key \r\n\
      \r\n")
 if yes_or_no("Do you have those three required things available?"):
     print("Cool.\n")
@@ -357,7 +367,8 @@ while True:
             print("Cool.\n")
         else:
             print("I will continue with that URL and token.")
-            print("I will ask for library names later.\n")
+#             print("I will ask for library names later.\n")
+            print("You will need to configure the rest of this section manually.\n")
             break
 
 
@@ -587,7 +598,8 @@ while True:
                 print("Cool.\n")
             else:
                 print("I will continue with that URL and token.")
-                print("I will ask for root folder and quality later.\n")
+#                 print("I will ask for root folder and quality later.\n")
+                print("You will need to configure the rest of this section manually.\n")
                 break
     else:
         break
@@ -695,7 +707,8 @@ while True:
                 print("Cool.\n")
             else:
                 print("I will continue with that URL and token.")
-                print("I will ask for root folder and quality later.\n")
+#                 print("I will ask for root folder and quality later.\n")
+                print("You will need to configure the rest of this section manually.\n")
                 break
     else:
         break

@@ -173,6 +173,7 @@ def process_sections(ps):
             if yes_or_no(f"Configure PMM for the {plex_section.type} library [{plex_section.title}]?"):
                 section_yaml = get_lib_skel()
 
+                print("\n------------------------------")
                 print(f"Let's start with collections")
                 if yes_or_no(f"Add a small standard set of collections to get started?"):
                     section_yaml['metadata_path'] = get_std_collections(plex_section.type)
@@ -192,6 +193,7 @@ def process_sections(ps):
                     section_yaml['metadata_path'] = convert_to_default_path(collections)
 
                 # Something about operations
+                print("\n------------------------------")
                 print(f"Next step, operations.")
                 print(f"PMM can perform a lot of different operations on a library.")
                 print(f"Most of these operations require some configuration.")
@@ -232,13 +234,14 @@ def process_sections(ps):
                     section_yaml.pop('operations')
 
                 # Something about overlays
+                print("\n------------------------------")
                 print(f"Finally, overlays.")
                 print(f"Many of these overlays allow customization.")
                 print(f"Going through them with a tool like this will ask a LOT of questions.")
                 print(f"For that reason this will not be a comprehensive list of possibilities.")
                 print(f"The tool will just enable the base overlay.")
                 overlays = []
-                if yes_or_no(f"Do you want to enable any operations on this library?"):
+                if yes_or_no(f"Do you want to enable any overlays on this library?"):
                     if yes_or_no(f"Add a small standard set of overlays to get started?  If you answer 'no' I will ask about all possible overlays."):
                         section_yaml['overlay_path'] = get_std_overlays(plex_section.type)
                     else:

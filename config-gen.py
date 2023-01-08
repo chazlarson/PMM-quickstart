@@ -170,7 +170,8 @@ def process_sections(ps):
     library_yaml = {}
     for plex_section in plex_sections:
         if plex_section.type != "artist":
-            if yes_or_no(f"Configure PMM for the {plex_section.type} library [{plex_section.title}]?"):
+            print("\n------------------------------")
+            if yes_or_no(f"\nConfigure PMM for the {plex_section.type} library [{plex_section.title}]?"):
                 section_yaml = get_lib_skel()
 
                 print("\n------------------------------")

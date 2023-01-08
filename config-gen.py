@@ -21,10 +21,15 @@ import secrets
 import os
 from defaults import get_options, get_collection_types, get_boolean_operations
 
-with open("config.json", "r") as jsonfile:
-    config_data = json.load(jsonfile)
-    print("Config read successful")
+config_data = {}
 
+try:
+    with open("config.json", "r") as jsonfile:
+        config_data = json.load(jsonfile)
+        print("Config read successful")
+except:
+    print("No local config file")
+    
 class Failed(Exception):
     pass
 

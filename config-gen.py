@@ -21,7 +21,25 @@ import secrets
 import os
 from defaults import get_options, get_collection_types, get_boolean_operations
 
-config_data = {}
+config_data = {
+    "PLEX_URL": "",
+    "PLEX_TOKEN": "",
+    "TMDB_KEY": "",
+    "TAUTULLI_URL": "",
+    "TAUTULLI_KEY": "",
+    "OMDB_KEY": "",
+    "NOTIFIARR_KEY": "",
+    "ANIDB_USER": "",
+    "ANIDB_PASS": "",
+    "RADARR_URL": "",
+    "RADARR_TOKEN": "",
+    "SONARR_URL": "",
+    "SONARR_TOKEN": "",
+    "TRAKT_CLIENT_ID": "",
+    "TRAKT_CLIENT_SECRET": "",
+    "MAL_CLIENT_ID": "",
+    "MAL_CLIENT_SECRET": "",
+}
 
 try:
     with open("config.json", "r") as jsonfile:

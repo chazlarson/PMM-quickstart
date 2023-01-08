@@ -1,0 +1,14 @@
+pyOpenSSL
+pyopenssl
+flask
+flask_bootstrap
+plexapi
+textual[dev]
+tmdbapis
+requests
+click
+python-dotenv==0.21.0
+lxml
+arrapi
+pyyaml
+secrets

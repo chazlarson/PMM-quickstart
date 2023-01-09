@@ -961,7 +961,7 @@ while True:
 
 print("Writing final config file.\n==============================\n")
 with open('config.yml', 'w') as outfile:
-    yaml_str = yaml.safe_dump(yaml_obj).replace(r"''", '')
+    yaml_str = yaml.safe_dump(yaml_obj).replace(r"''", '').replace(": null", ":")
     outfile.write(yaml_str)
 
 print("Config generation Complete.\n==============================\n")

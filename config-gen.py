@@ -139,8 +139,7 @@ def get_overlays_ops():
 
 def get_std_overlays(type):
     retval = None
-    std_overlays = get_options("overlays", type, basics=True)
-    retval =  get_overlays_ops() + convert_to_default_path(std_overlays)
+    retval = get_options("overlays", type, basics=True)
     return retval
 
 def get_ip():
@@ -258,7 +257,7 @@ def process_sections(ps):
                 overlays = []
                 if yes_or_no(f"Do you want to enable any overlays on this library?"):
                     if yes_or_no(f"Add a small standard set of overlays to get started?  If you answer 'no' I will ask about all possible overlays."):
-                        section_yaml['overlay_path'] = get_std_overlays(plex_section.type)
+                        overlays = get_std_overlays(plex_section.type)
                     else:
                         options = get_options("overlays", plex_section.type, mal=myanimelist, trakt=trakt, tautulli=tautulli)
                         for o in options:
@@ -502,14 +501,21 @@ while True:
         try:
             response = get(MDB_URL, params={"i": "tt0080684", "apikey": MDBLIST_KEY})
             if response.status_code < 400:
-                print("Success.\n==============================\n")
-                yaml_obj['mdblist']['apikey'] = MDBLIST_KEY
-                CONFIG_DATA['MDBLIST_KEY'] = MDBLIST_KEY
-                break
+                success = bool(response.json()["response"])
+                if success:
+                    print("Success.\n==============================\n")
+                    yaml_obj['mdblist']['apikey'] = MDBLIST_KEY
+                    CONFIG_DATA['MDBLIST_KEY'] = MDBLIST_KEY
+                    break
+                else:
+                    raise Failed(response.json()["error"])
             else:
                 raise Failed(f"MDBList Error")
         except Exception as ex:
-            print(f"I was unable to connect to {MDB_URL}")
+            if response.status_code < 400:
+                print(f"I was unable to connect to {MDB_URL}: {ex.args[0]}")
+            else:
+                print(f"I was unable to connect to {MDB_URL}: {response.status_code}")
             if yes_or_no("Would you like to try a different apikey?"):
                 print("Cool.\n")
             else:
@@ -517,7 +523,6 @@ while True:
                 break
     else:
         break
-
 
 # notifiarr:
 #   apikey: 66fc0993-658c-475f-9827-83a7eeec01fa
@@ -590,6 +595,8 @@ while True:
                         yaml_obj['anidb']['password'] = ANIDB_PASS
                         CONFIG_DATA['ANIDB_PASS'] = ANIDB_PASS
                         break
+                    else:
+                        raise Failed("AniDB Error")
                 except Exception as e:
                     raise Failed("AniDB Error")
             else:

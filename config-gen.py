@@ -23,7 +23,7 @@ import secrets
 import os
 from defaults import get_options, get_collection_types, get_boolean_operations
 
-config_data = {
+default_config_data = {
     "PLEX_URL": "",
     "PLEX_TOKEN": "",
     "TMDB_KEY": "",
@@ -43,14 +43,25 @@ config_data = {
     "MAL_CLIENT_ID": "",
     "MAL_CLIENT_SECRET": "",
 }
+CONFIG_DATA = default_config_data
+
+def validate_config(config_data):
+    for key in default_config_data.keys():
+        try:
+            tmp=config_data[key]
+        except Exception as ex:
+            config_data[key]=""
+    return config_data
 
 try:
     with open("config.json", "r") as jsonfile:
-        config_data = json.load(jsonfile)
+        CONFIG_DATA = json.load(jsonfile)
         print("Config read successful")
 except:
     print("No local config file")
-    
+
+CONFIG_DATA = validate_config(CONFIG_DATA)
+
 class Failed(Exception):
     pass
 
@@ -358,8 +369,8 @@ print("Connecting to required services.\n==============================\n")
 plex = None
 
 while True:
-    PLEX_URL = click.prompt(f"Plex URL", type=str, default=config_data['PLEX_URL'])
-    PLEX_TOKEN = click.prompt(f"Plex Token", type=str, default=config_data['PLEX_TOKEN'])
+    PLEX_URL = click.prompt(f"Plex URL", type=str, default=CONFIG_DATA['PLEX_URL'])
+    PLEX_TOKEN = click.prompt(f"Plex Token", type=str, default=CONFIG_DATA['PLEX_TOKEN'])
     failed = False
 
     print(f"Attempting to connect to {PLEX_URL}...")
@@ -368,9 +379,9 @@ while True:
         if plex is not None:
             print("Success.\n==============================\n")
             yaml_obj['plex']['url'] = PLEX_URL
-            config_data['PLEX_URL'] = PLEX_URL
+            CONFIG_DATA['PLEX_URL'] = PLEX_URL
             yaml_obj['plex']['token'] = PLEX_TOKEN
-            config_data['PLEX_TOKEN'] = PLEX_TOKEN
+            CONFIG_DATA['PLEX_TOKEN'] = PLEX_TOKEN
             break
         else:
             raise Exception
@@ -400,13 +411,13 @@ while True:
             break
 
 while True:
-    TMDB_KEY = click.prompt(f"TMDB API Key", type=str, default=config_data['TMDB_KEY'])
+    TMDB_KEY = click.prompt(f"TMDB API Key", type=str, default=CONFIG_DATA['TMDB_KEY'])
 
     try:
         tmdb = TMDbAPIs(TMDB_KEY, language="en")
         print("Success.\n==============================\n")
         yaml_obj['tmdb']['apikey'] = TMDB_KEY
-        config_data['TMDB_KEY'] = TMDB_KEY
+        CONFIG_DATA['TMDB_KEY'] = TMDB_KEY
         break
     except:
         print(f"That does not appear to be a valid TMDB key.")
@@ -424,8 +435,8 @@ tautulli = False
 
 while True:
     if yes_or_no("Would you like to connect PMM to Tautulli?"):
-        TAUTULLI_URL = click.prompt(f"Tautulli URL", type=str, default=config_data['TAUTULLI_URL'])
-        TAUTULLI_KEY = click.prompt(f"Tautulli API Key", type=str, default=config_data['TAUTULLI_KEY'])
+        TAUTULLI_URL = click.prompt(f"Tautulli URL", type=str, default=CONFIG_DATA['TAUTULLI_URL'])
+        TAUTULLI_KEY = click.prompt(f"Tautulli API Key", type=str, default=CONFIG_DATA['TAUTULLI_KEY'])
 
 
         try:
@@ -436,9 +447,9 @@ while True:
                 print("Success.\n==============================\n")
                 tautulli = True
                 yaml_obj['tautulli']['url'] = TAUTULLI_URL
-                config_data['TAUTULLI_URL'] = TAUTULLI_URL
+                CONFIG_DATA['TAUTULLI_URL'] = TAUTULLI_URL
                 yaml_obj['tautulli']['apikey'] = TAUTULLI_KEY
-                config_data['TAUTULLI_KEY'] = TAUTULLI_KEY
+                CONFIG_DATA['TAUTULLI_KEY'] = TAUTULLI_KEY
                 break
         except Exception as ex:
             print(f"I was unable to connect to {TAUTULLI_URL}")
@@ -458,14 +469,14 @@ OMDB_URL = "http://www.omdbapi.com/"
 
 while True:
     if yes_or_no("Do you have an OMDB API Key?"):
-        OMDB_KEY = click.prompt(f"OMDB API Key", type=str, default=config_data['OMDB_KEY'])
+        OMDB_KEY = click.prompt(f"OMDB API Key", type=str, default=CONFIG_DATA['OMDB_KEY'])
 
         try:
             response = get(OMDB_URL, params={"i": "tt0080684", "apikey": OMDB_KEY})
             if response.status_code < 400:
                 print("Success.\n==============================\n")
                 yaml_obj['omdb']['apikey'] = OMDB_KEY
-                config_data['OMDB_KEY'] = OMDB_KEY
+                CONFIG_DATA['OMDB_KEY'] = OMDB_KEY
                 break
             else:
                 raise Failed(f"OMDb Error")
@@ -486,14 +497,14 @@ MDB_URL = "https://mdblist.com/api/"
 
 while True:
     if yes_or_no("Do you have an MDBList API Key?"):
-        MDBLIST_KEY = click.prompt(f"MDBList API Key", type=str, default=config_data['MDBLIST_KEY'])
+        MDBLIST_KEY = click.prompt(f"MDBList API Key", type=str, default=CONFIG_DATA['MDBLIST_KEY'])
 
         try:
             response = get(MDB_URL, params={"i": "tt0080684", "apikey": MDBLIST_KEY})
             if response.status_code < 400:
                 print("Success.\n==============================\n")
                 yaml_obj['mdblist']['apikey'] = MDBLIST_KEY
-                config_data['MDBLIST_KEY'] = MDBLIST_KEY
+                CONFIG_DATA['MDBLIST_KEY'] = MDBLIST_KEY
                 break
             else:
                 raise Failed(f"MDBList Error")
@@ -516,7 +527,7 @@ NOTIFIARR_URL = "https://notifiarr.com/api/v1/"
 while True:
 
     if yes_or_no("Do you have a Notifiarr API Key?"):
-        NOTIFIARR_KEY = click.prompt(f"Notifiarr API Key", type=str, default=config_data['NOTIFIARR_KEY'])
+        NOTIFIARR_KEY = click.prompt(f"Notifiarr API Key", type=str, default=CONFIG_DATA['NOTIFIARR_KEY'])
 
         header = {"X-API-Key": NOTIFIARR_KEY}
 
@@ -527,7 +538,7 @@ while True:
                     response_json = response.json()
                     print("Success.\n==============================\n")
                     yaml_obj['notifiarr']['apikey'] = NOTIFIARR_KEY
-                    config_data['NOTIFIARR_KEY'] = NOTIFIARR_KEY
+                    CONFIG_DATA['NOTIFIARR_KEY'] = NOTIFIARR_KEY
                     if yes_or_no("Would you like to configure notifications to go through Notifarr?"):
                         yaml_obj['webhooks']['error'] = 'notifiarr'
                         yaml_obj['webhooks']['version'] = 'notifiarr'
@@ -561,8 +572,8 @@ ANIDB_LOGIN_URL = f"{ANIDB_BASE_URL}/perl-bin/animedb.pl"
 
 while True:
     if yes_or_no("Would you like to connect PMM to AniDB?"):
-        ANIDB_USER = click.prompt(f"AniDB User", type=str, default=config_data['ANIDB_USER'])
-        ANIDB_PASS = click.prompt(f"AniDB Password", type=str, default=config_data['ANIDB_PASS'])
+        ANIDB_USER = click.prompt(f"AniDB User", type=str, default=CONFIG_DATA['ANIDB_USER'])
+        ANIDB_PASS = click.prompt(f"AniDB Password", type=str, default=CONFIG_DATA['ANIDB_PASS'])
 
         try:
             data = {"show": "main", "xuser": ANIDB_USER, "xpass": ANIDB_PASS, "xdoautologin": "on"}
@@ -575,9 +586,9 @@ while True:
                     if response_html.xpath("//li[@class='sub-menu my']/@title"):
                         print("Success.\n==============================\n")
                         yaml_obj['anidb']['username'] = ANIDB_USER
-                        config_data['ANIDB_USER'] = ANIDB_USER
+                        CONFIG_DATA['ANIDB_USER'] = ANIDB_USER
                         yaml_obj['anidb']['password'] = ANIDB_PASS
-                        config_data['ANIDB_PASS'] = ANIDB_PASS
+                        CONFIG_DATA['ANIDB_PASS'] = ANIDB_PASS
                         break
                 except Exception as e:
                     raise Failed("AniDB Error")
@@ -599,16 +610,16 @@ while True:
 
 while True:
     if yes_or_no("Would you like to connect PMM to Radarr?"):
-        RADARR_URL = click.prompt(f"Radarr URL", type=str, default=config_data['RADARR_URL'])
-        RADARR_TOKEN = click.prompt(f"Radarr API Key", type=str, default=config_data['RADARR_TOKEN'])
+        RADARR_URL = click.prompt(f"Radarr URL", type=str, default=CONFIG_DATA['RADARR_URL'])
+        RADARR_TOKEN = click.prompt(f"Radarr API Key", type=str, default=CONFIG_DATA['RADARR_TOKEN'])
 
         try:
             radarr = RadarrAPI(RADARR_URL, RADARR_TOKEN, session=session)
             print("Success.\n==============================\n")
             yaml_obj['radarr']['url'] = RADARR_URL
-            config_data['RADARR_URL'] = RADARR_URL
+            CONFIG_DATA['RADARR_URL'] = RADARR_URL
             yaml_obj['radarr']['token'] = RADARR_TOKEN
-            config_data['RADARR_TOKEN'] = RADARR_TOKEN
+            CONFIG_DATA['RADARR_TOKEN'] = RADARR_TOKEN
 
             RADARR_PROFILES = radarr.quality_profile()
             if len(RADARR_PROFILES) > 1:
@@ -675,17 +686,17 @@ while True:
 
 while True:
     if yes_or_no("Would you like to connect PMM to Sonarr?"):
-        SONARR_URL = click.prompt(f"Sonarr URL", type=str, default=config_data['SONARR_URL'])
-        SONARR_TOKEN = click.prompt(f"Sonarr API Key", type=str, default=config_data['SONARR_TOKEN'])
+        SONARR_URL = click.prompt(f"Sonarr URL", type=str, default=CONFIG_DATA['SONARR_URL'])
+        SONARR_TOKEN = click.prompt(f"Sonarr API Key", type=str, default=CONFIG_DATA['SONARR_TOKEN'])
 
         try:
             sonarr = SonarrAPI(SONARR_URL, SONARR_TOKEN, session=session)
 
             print("Success.\n==============================\n")
             yaml_obj['sonarr']['url'] = SONARR_URL
-            config_data['SONARR_URL'] = SONARR_URL
+            CONFIG_DATA['SONARR_URL'] = SONARR_URL
             yaml_obj['sonarr']['token'] = SONARR_TOKEN
-            config_data['SONARR_TOKEN'] = SONARR_TOKEN
+            CONFIG_DATA['SONARR_TOKEN'] = SONARR_TOKEN
 
             SONARR_PROFILES = sonarr.quality_profile()
             if len(SONARR_PROFILES) > 1:
@@ -799,8 +810,8 @@ while True:
             if response.status_code == 503:
                 print("Trakt Error: Trakt Not Available")
                 break
-            TRAKT_CLIENT_ID = click.prompt(f"Trakt Client ID", type=str, default=config_data['TRAKT_CLIENT_ID'])
-            TRAKT_CLIENT_SECRET = click.prompt(f"Trakt Client Secret", type=str, default=config_data['TRAKT_CLIENT_SECRET'])
+            TRAKT_CLIENT_ID = click.prompt(f"Trakt Client ID", type=str, default=CONFIG_DATA['TRAKT_CLIENT_ID'])
+            TRAKT_CLIENT_SECRET = click.prompt(f"Trakt Client Secret", type=str, default=CONFIG_DATA['TRAKT_CLIENT_SECRET'])
 
             url = f"https://trakt.tv/oauth/authorize?response_type=code&client_id={TRAKT_CLIENT_ID}&redirect_uri={redirect_uri_encoded}"
 
@@ -849,9 +860,9 @@ while True:
 
                         trakt = True
                         yaml_obj['trakt']["client_id"] = TRAKT_CLIENT_ID
-                        config_data['TRAKT_CLIENT_ID'] = TRAKT_CLIENT_ID
+                        CONFIG_DATA['TRAKT_CLIENT_ID'] = TRAKT_CLIENT_ID
                         yaml_obj['trakt']["client_secret"] = TRAKT_CLIENT_SECRET
-                        config_data['TRAKT_CLIENT_SECRET'] = TRAKT_CLIENT_SECRET
+                        CONFIG_DATA['TRAKT_CLIENT_SECRET'] = TRAKT_CLIENT_SECRET
                         yaml_obj['trakt']["authorization"]["access_token"] = response.json()['access_token']
                         yaml_obj['trakt']["authorization"]["token_type"] = response.json()['token_type']
                         yaml_obj['trakt']["authorization"]["expires_in"] = response.json()['expires_in']
@@ -888,8 +899,8 @@ LOCAL_URL = ""
 while True:
     try:
         if yes_or_no("Would you like to connect PMM to MyAnimeList?"):
-            MAL_CLIENT_ID = click.prompt(f"MyAnimeList Client ID", type=str, default=config_data['MAL_CLIENT_ID'])
-            MAL_CLIENT_SECRET = click.prompt(f"MyAnimeList Client Secret", type=str, default=config_data['MAL_CLIENT_SECRET'])
+            MAL_CLIENT_ID = click.prompt(f"MyAnimeList Client ID", type=str, default=CONFIG_DATA['MAL_CLIENT_ID'])
+            MAL_CLIENT_SECRET = click.prompt(f"MyAnimeList Client Secret", type=str, default=CONFIG_DATA['MAL_CLIENT_SECRET'])
 
             code_verifier = secrets.token_urlsafe(100)[:128]
             url = f"{MAL_AUTHORIZE_URL}?response_type=code&client_id={MAL_CLIENT_ID}&code_challenge={code_verifier}"
@@ -926,9 +937,9 @@ while True:
 
             myanimelist = True
             yaml_obj['mal']["client_id"] = MAL_CLIENT_ID
-            config_data['MAL_CLIENT_ID'] = MAL_CLIENT_ID
+            CONFIG_DATA['MAL_CLIENT_ID'] = MAL_CLIENT_ID
             yaml_obj['mal']["client_secret"] = MAL_CLIENT_SECRET
-            config_data['MAL_CLIENT_SECRET'] = MAL_CLIENT_SECRET
+            CONFIG_DATA['MAL_CLIENT_SECRET'] = MAL_CLIENT_SECRET
             yaml_obj['mal']["authorization"]["access_token"] = new_authorization["access_token"]
             yaml_obj['mal']["authorization"]["token_type"] = new_authorization["token_type"]
             yaml_obj['mal']["authorization"]["expires_in"] = new_authorization["expires_in"]
@@ -950,7 +961,7 @@ print("Service connections complete.\n==============================\n")
 
 print("Writing config.json.\n==============================\n")
 with open("config.json", "w") as outfile:
-    json.dump(config_data, outfile, indent=4)
+    json.dump(CONFIG_DATA, outfile, indent=4)
 
 print("Gathering Library details.\n==============================\n")
 

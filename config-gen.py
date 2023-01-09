@@ -21,7 +21,7 @@ import webbrowser
 from types import SimpleNamespace
 import secrets
 import os
-from defaults import get_options, get_collection_types, get_boolean_operations
+from defaults import get_options, get_collection_types, get_boolean_operations, get_mass_update_operations
 
 config_data = {
     "PLEX_URL": "",
@@ -214,19 +214,19 @@ def process_sections(ps):
                             tmp = {op.path: False}
                         operations.append(tmp)
 
-                    print(f"Next, mass update operations.")
-                    print(f"Generally speaking, these operations are expensive.")
-                    print(f"Don't just enable enverything here, particularly")
-                    print(f"if you have very large libraries.")
-                    ratings_updates = False
+                    # print(f"Next, mass update operations.")
+                    # print(f"Generally speaking, these operations are expensive.")
+                    # print(f"Don't just enable enverything here, particularly")
+                    # print(f"if you have very large libraries.")
+                    # ratings_updates = False
 
-                    ratings_ops = get_boolean_operations()
-                    for op in boolean_ops:
-                        if yes_or_no(f"Should PMM {op.notes}?"):
-                            tmp = {op.path: True}
-                        else:
-                            tmp = {op.path: False}
-                        operations.append(tmp)
+                    # ratings_ops = get_mass_update_operations()
+                    # for op in boolean_ops:
+                    #     if yes_or_no(f"Should PMM {op.notes}?"):
+                    #         tmp = {op.path: True}
+                    #     else:
+                    #         tmp = {op.path: False}
+                    #     operations.append(tmp)
 
                     # if yes_or_no(f"Do you want to enable any operations on this library?"):
                     #     section_yaml['overlay_path'] = get_std_overlays(plex_section.type)

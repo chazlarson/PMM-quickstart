@@ -30,6 +30,7 @@ config_data = {
     "TAUTULLI_URL": "",
     "TAUTULLI_KEY": "",
     "OMDB_KEY": "",
+    "MDBLIST_KEY": "",
     "NOTIFIARR_KEY": "",
     "ANIDB_USER": "",
     "ANIDB_PASS": "",
@@ -62,7 +63,7 @@ def get(url, json=None, headers=None, params=None):
 def post(url, data=None, json=None, headers=None):
     return session.post(url, data=data, json=json, headers=headers)
 
-def header(language="en-US,en;q=0.5"):
+def def_header(language="en-US,en;q=0.5"):
     return {"Accept-Language": "eng" if language == "default" else language, "User-Agent": "Mozilla/5.0 Firefox/102.0"}
 
 def test_url(url):
@@ -272,6 +273,7 @@ def prep_config(raw_config):
     yaml_obj['tautulli']['url'] = empty_value
     yaml_obj['tautulli']['apikey'] = empty_value
     yaml_obj['omdb']['apikey'] = empty_value
+    yaml_obj['mdblist']['apikey'] = empty_value
     yaml_obj['notifiarr']['apikey'] = empty_value
     yaml_obj['webhooks']['error'] = empty_value
     yaml_obj['webhooks']['version'] = empty_value
@@ -330,12 +332,13 @@ else:
 print("You MAY need these bits of information, depending on which other services you want to leverage: \r\n\
     1. Your Tautulli URL and API Key\r\n\
     2. Your OMDB API Key\r\n\
-    3. Your Notifiarr API Key\r\n\
-    4. Your ANIDB username and password\r\n\
-    5. Your Radarr URL and API Key\r\n\
-    6. Your Sonarr URL and API Key\r\n\
-    7. Your Trakt Client ID and Client Secret\r\n\
-    8. Your MyAnimeList Client ID and Client Secret\r\n\
+    3. Your MDBList API Key\r\n\
+    4. Your Notifiarr API Key\r\n\
+    5. Your ANIDB username and password\r\n\
+    6. Your Radarr URL and API Key\r\n\
+    7. Your Sonarr URL and API Key\r\n\
+    8. Your Trakt Client ID and Client Secret\r\n\
+    9. Your MyAnimeList Client ID and Client Secret\r\n\
      \r\n\
     Every URL referenced above must be a fully-qualified URL:\r\n\
     [https://plex.YOURDOMAIN.COM, http://radarr:8787, http://192.168.1.11:32400, etc.]\r\n\
@@ -476,6 +479,35 @@ while True:
     else:
         break
 
+# mdblist:
+#   apikey: #########################
+
+MDB_URL = "https://mdblist.com/api/"
+
+while True:
+    if yes_or_no("Do you have an MDBList API Key?"):
+        MDBLIST_KEY = click.prompt(f"MDBList API Key", type=str, default=config_data['MDBLIST_KEY'])
+
+        try:
+            response = get(MDB_URL, params={"i": "tt0080684", "apikey": MDBLIST_KEY})
+            if response.status_code < 400:
+                print("Success.\n==============================\n")
+                yaml_obj['mdblist']['apikey'] = MDBLIST_KEY
+                config_data['MDBLIST_KEY'] = MDBLIST_KEY
+                break
+            else:
+                raise Failed(f"MDBList Error")
+        except Exception as ex:
+            print(f"I was unable to connect to {MDB_URL}")
+            if yes_or_no("Would you like to try a different apikey?"):
+                print("Cool.\n")
+            else:
+                print("MDBList disabled.")
+                break
+    else:
+        break
+
+
 # notifiarr:
 #   apikey: 66fc0993-658c-475f-9827-83a7eeec01fa
 
@@ -534,7 +566,7 @@ while True:
 
         try:
             data = {"show": "main", "xuser": ANIDB_USER, "xpass": ANIDB_PASS, "xdoautologin": "on"}
-            headers=header()
+            headers=def_header()
             response = post(ANIDB_LOGIN_URL, data=data, headers=headers)
 
             if response.status_code < 400:
@@ -780,7 +812,7 @@ while True:
             TRAKT_PIN = click.prompt(f"Enter the Trakt pin [hit enter if the page displayed an error]", type=str, default='99999').lower().strip()
 
             if TRAKT_PIN != "99999":
-                json = {
+                req_json = {
                     "code": TRAKT_PIN,
                     "client_id": TRAKT_CLIENT_ID,
                     "client_secret": TRAKT_CLIENT_SECRET,
@@ -788,7 +820,7 @@ while True:
                     "grant_type": "authorization_code",
                 }
                 response = post(
-                    f"{base_url}/oauth/token", json=json, headers={"Content-Type": "application/json"}
+                    f"{base_url}/oauth/token", json=req_json, headers={"Content-Type": "application/json"}
                 )
 
                 if response.status_code != 200:
@@ -916,9 +948,9 @@ while True:
             break
 print("Service connections complete.\n==============================\n")
 
-# print("Writing config.json.\n==============================\n")
-# with open("config.json", "w") as outfile:
-#     json.dump(config_data, outfile, indent=4)
+print("Writing config.json.\n==============================\n")
+with open("config.json", "w") as outfile:
+    json.dump(config_data, outfile, indent=4)
 
 print("Gathering Library details.\n==============================\n")
 

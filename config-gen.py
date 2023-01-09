@@ -21,7 +21,7 @@ import webbrowser
 from types import SimpleNamespace
 import secrets
 import os
-from defaults import get_options, get_collection_types, get_boolean_operations, get_mass_update_operations
+from defaults import get_options, get_collection_types, get_boolean_operations
 
 config_data = {
     "PLEX_URL": "",

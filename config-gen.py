@@ -916,9 +916,9 @@ while True:
             break
 print("Service connections complete.\n==============================\n")
 
-print("Writing config.json.\n==============================\n")
-with open("config.json", "w") as outfile:
-    json.dump(config_data, outfile, indent=4)
+# print("Writing config.json.\n==============================\n")
+# with open("config.json", "w") as outfile:
+#     json.dump(config_data, outfile, indent=4)
 
 print("Gathering Library details.\n==============================\n")
 
